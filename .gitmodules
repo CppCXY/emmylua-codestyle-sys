@@ -1,0 +1,3 @@
+[submodule "3rd/EmmyLuaCodeStyle"]
+	path = 3rd/EmmyLuaCodeStyle
+	url = https://github.com/CppCXY/EmmyLuaCodeStyle.git
