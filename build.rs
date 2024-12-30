@@ -2,7 +2,6 @@ fn main() {
     std::env::set_var("CC_LOG", "1");
 
     build_emmyluacodestyle();
-    gen_binding();
 }
 
 fn build_emmyluacodestyle() {
@@ -42,15 +41,4 @@ fn build_emmyluacodestyle() {
     }
 
     builder.compile("EmmyLuaCodeStyle");
-}
-
-fn gen_binding() {
-    let bindings = bindgen::Builder::default()
-        .header("3rd/EmmyLuaCodeStyle/CodeFormatCLib/include/CodeFormatCLib.h")
-        .generate()
-        .expect("Unable to generate bindings");
-
-    bindings
-        .write_to_file("src/bindings.rs")
-        .expect("Couldn't write bindings!");
 }
