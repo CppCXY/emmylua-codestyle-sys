@@ -3,12 +3,20 @@ mod test;
 use std::ffi::{CStr, CString};
 
 #[repr(C)]
-pub struct RangeFormatResult {
+struct CLibRangeFormatResult {
     pub start_line: i32,
     pub start_col: i32,
     pub end_line: i32,
     pub end_col: i32,
     pub text: *mut libc::c_char,
+}
+
+pub struct RangeFormatResult {
+    pub start_line: i32,
+    pub start_col: i32,
+    pub end_line: i32,
+    pub end_col: i32,
+    pub text: String,
 }
 
 extern "C" {
@@ -20,7 +28,7 @@ extern "C" {
         startCol: i32,
         endLine: i32,
         endCol: i32,
-    ) -> RangeFormatResult;
+    ) -> CLibRangeFormatResult;
     fn FreeReformatResult(ptr: *mut libc::c_char);
     fn UpdateCodeStyle(workspaceUri: *const libc::c_char, configPath: *const libc::c_char);
     fn RemoveCodeStyle(workspaceUri: *const libc::c_char);
@@ -45,7 +53,7 @@ pub fn range_format_code(
 ) -> RangeFormatResult {
     let c_code = CString::new(code).unwrap();
     let c_uri = CString::new(uri).unwrap();
-    unsafe {
+    let c_result = unsafe {
         RangeFormatLuaCode(
             c_code.as_ptr(),
             c_uri.as_ptr(),
@@ -54,7 +62,18 @@ pub fn range_format_code(
             end_line,
             end_col,
         )
-    }
+    };
+
+    let result = RangeFormatResult {
+        start_line: c_result.start_line,
+        start_col: c_result.start_col,
+        end_line: c_result.end_line,
+        end_col: c_result.end_col,
+        text: unsafe { CStr::from_ptr(c_result.text).to_string_lossy().into_owned() },
+    };
+    unsafe { FreeReformatResult(c_result.text) };
+
+    result
 }
 
 pub fn update_code_style(workspace_uri: &str, config_path: &str) {
