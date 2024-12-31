@@ -8,7 +8,11 @@ include = [
     "Cargo.toml",
     "build.rs",
     "src/**",
-    "3rd/**"
+    "3rd/EmmyLuaCodeStyle/3rd/wildcards/**",
+    "3rd/EmmyLuaCodeStyle/CodeFormatCLib/**",
+    "3rd/EmmyLuaCodeStyle/CodeFormatCore/**",
+    "3rd/EmmyLuaCodeStyle/LuaParser/**",
+    "3rd/EmmyLuaCodeStyle/Util/**",
 ]
 
 [dependencies]
