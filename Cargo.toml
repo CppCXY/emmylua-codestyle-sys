@@ -2,8 +2,12 @@
 name = "emmylua_codestyle"
 version = "0.1.0"
 edition = "2021"
-description = "Lua code formatting with EmmyLuaCodeStyle"
+description = "Lua code formatting lib with EmmyLuaCodeStyle"
 license = "MIT"
+readme = "README.md"
+keywords = ["lua", "emmylua", "code", "style", "format"]
+categories = ["development-tools"]
+repository = "https://github.com/CppCXY/emmylua-codestyle-sys"
 include = [
     "Cargo.toml",
     "build.rs",
