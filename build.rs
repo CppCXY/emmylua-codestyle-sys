@@ -34,8 +34,14 @@ fn build_emmyluacodestyle() {
     }
 
     if cfg!(windows) {
-        builder.flag("/utf-8");
-        builder.flag("/std:c++17");
+        let compiler = builder.get_compiler();
+        if compiler.is_like_msvc() {
+            builder.flag("/utf-8");
+            builder.flag("/std:c++17");
+        } else {
+            // Assuming mingw on Windows
+            builder.flag("-std=c++17");
+        }
     } else {
         builder.flag("-std=c++17");
     }
