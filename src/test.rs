@@ -33,4 +33,5 @@ mod tests {
         let result = crate::check_code_style("test.lua", code);
         println!("{:?}", result);
     }
+
 }

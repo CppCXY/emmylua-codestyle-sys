@@ -102,6 +102,9 @@ pub fn check_code_style(uri: &str, code: &str) -> Vec<CodeStyleDiagnostic> {
     let c_uri = CString::new(uri).unwrap();
     let c_code = CString::new(code).unwrap();
     let c_result = unsafe { CheckCodeStyle(c_code.as_ptr(), c_uri.as_ptr()) };
+    if c_result.is_null() {
+        return vec![];
+    }
     let result = unsafe { CStr::from_ptr(c_result).to_string_lossy().into_owned() };
     unsafe { FreeReformatResult(c_result) };
     // the format is start_line|start_col|end_line|end_col|message \n
