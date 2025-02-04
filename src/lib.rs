@@ -11,12 +11,22 @@ struct CLibRangeFormatResult {
     pub text: *mut libc::c_char,
 }
 
+#[derive(Debug)]
 pub struct RangeFormatResult {
     pub start_line: i32,
     pub start_col: i32,
     pub end_line: i32,
     pub end_col: i32,
     pub text: String,
+}
+
+#[derive(Debug)]
+pub struct CodeStyleDiagnostic {
+    pub start_line: i32,
+    pub start_col: i32,
+    pub end_line: i32,
+    pub end_col: i32,
+    pub message: String,
 }
 
 extern "C" {
@@ -32,6 +42,7 @@ extern "C" {
     fn FreeReformatResult(ptr: *mut libc::c_char);
     fn UpdateCodeStyle(workspaceUri: *const libc::c_char, configPath: *const libc::c_char);
     fn RemoveCodeStyle(workspaceUri: *const libc::c_char);
+    fn CheckCodeStyle(code: *const libc::c_char, uri: *const libc::c_char) -> *mut libc::c_char;
 }
 
 pub fn reformat_code(code: &str, uri: &str) -> String {
@@ -85,4 +96,33 @@ pub fn update_code_style(workspace_uri: &str, config_path: &str) {
 pub fn remove_code_style(workspace_uri: &str) {
     let c_workspace_uri = CString::new(workspace_uri).unwrap();
     unsafe { RemoveCodeStyle(c_workspace_uri.as_ptr()) };
+}
+
+pub fn check_code_style(uri: &str, code: &str) -> Vec<CodeStyleDiagnostic> {
+    let c_uri = CString::new(uri).unwrap();
+    let c_code = CString::new(code).unwrap();
+    let c_result = unsafe { CheckCodeStyle(c_code.as_ptr(), c_uri.as_ptr()) };
+    let result = unsafe { CStr::from_ptr(c_result).to_string_lossy().into_owned() };
+    unsafe { FreeReformatResult(c_result) };
+    // the format is start_line|start_col|end_line|end_col|message \n
+    let result = result
+        .split("\n")
+        .map(|line| {
+            let parts: Vec<&str> = line.split("|").collect();
+            if parts.len() == 5 {
+                Some(CodeStyleDiagnostic {
+                    start_line: parts[0].parse().unwrap(),
+                    start_col: parts[1].parse().unwrap(),
+                    end_line: parts[2].parse().unwrap(),
+                    end_col: parts[3].parse().unwrap(),
+                    message: parts[4].to_string(),
+                })
+            } else {
+                None
+            }
+        })
+        .filter_map(|x| x)
+        .collect::<Vec<CodeStyleDiagnostic>>();
+
+    result
 }

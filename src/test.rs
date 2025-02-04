@@ -23,4 +23,14 @@ mod tests {
         let expected = "local a = 1\n";
         assert_eq!(result.text, expected);
     }
+
+    #[test]
+    fn test_check_code_style() {
+        let code = r#"
+        print(a+b)
+        "#;
+
+        let result = crate::check_code_style("test.lua", code);
+        println!("{:?}", result);
+    }
 }
