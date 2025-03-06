@@ -61,7 +61,7 @@ pub fn range_format_code(
     start_col: i32,
     end_line: i32,
     end_col: i32,
-) -> RangeFormatResult {
+) -> Option<RangeFormatResult> {
     let c_code = CString::new(code).unwrap();
     let c_uri = CString::new(uri).unwrap();
     let c_result = unsafe {
@@ -75,6 +75,10 @@ pub fn range_format_code(
         )
     };
 
+    if c_result.text.is_null() {
+        return None;
+    }
+
     let result = RangeFormatResult {
         start_line: c_result.start_line,
         start_col: c_result.start_col,
@@ -84,7 +88,7 @@ pub fn range_format_code(
     };
     unsafe { FreeReformatResult(c_result.text) };
 
-    result
+    Some(result)
 }
 
 pub fn update_code_style(workspace_uri: &str, config_path: &str) {

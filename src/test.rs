@@ -19,7 +19,7 @@ mod tests {
         local b = 2
         print(a+b)
         "#;
-        let result = crate::range_format_code(code, "test.lua", 1, 1, 1, 1);
+        let result = crate::range_format_code(code, "test.lua", 1, 1, 1, 1).unwrap();
         let expected = "local a = 1\n";
         assert_eq!(result.text, expected);
     }
