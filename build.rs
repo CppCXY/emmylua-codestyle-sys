@@ -1,6 +1,4 @@
 fn main() {
-    std::env::set_var("CC_LOG", "1");
-
     build_emmyluacodestyle();
 }
 

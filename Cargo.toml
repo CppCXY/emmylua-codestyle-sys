@@ -1,7 +1,7 @@
 [package]
 name = "emmylua_codestyle"
-version = "0.4.2"
-edition = "2021"
+version = "0.5.0"
+edition = "2024"
 authors = ["CppCXY"]
 description = "Lua code formatting lib with EmmyLuaCodeStyle"
 license = "MIT"

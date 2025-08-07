@@ -29,8 +29,32 @@ pub struct CodeStyleDiagnostic {
     pub message: String,
 }
 
-extern "C" {
-    fn ReformatLuaCode(code: *const libc::c_char, uri: *const libc::c_char) -> *mut libc::c_char;
+#[derive(Debug)]
+#[repr(C)]
+pub struct FormattingOptions {
+    pub indent_size: u32,
+    pub use_tabs: bool,
+    pub insert_final_newline: bool,
+    pub non_standard_symbol: bool,
+}
+
+impl Default for FormattingOptions {
+    fn default() -> Self {
+        FormattingOptions {
+            indent_size: 4,
+            use_tabs: false,
+            insert_final_newline: true,
+            non_standard_symbol: false,
+        }
+    }
+}
+
+unsafe extern "C" {
+    fn ReformatLuaCode(
+        code: *const libc::c_char,
+        uri: *const libc::c_char,
+        options: FormattingOptions,
+    ) -> *mut libc::c_char;
     fn RangeFormatLuaCode(
         code: *const libc::c_char,
         uri: *const libc::c_char,
@@ -38,6 +62,7 @@ extern "C" {
         startCol: i32,
         endLine: i32,
         endCol: i32,
+        options: FormattingOptions,
     ) -> CLibRangeFormatResult;
     fn FreeReformatResult(ptr: *mut libc::c_char);
     fn UpdateCodeStyle(workspaceUri: *const libc::c_char, configPath: *const libc::c_char);
@@ -45,10 +70,10 @@ extern "C" {
     fn CheckCodeStyle(code: *const libc::c_char, uri: *const libc::c_char) -> *mut libc::c_char;
 }
 
-pub fn reformat_code(code: &str, uri: &str) -> String {
+pub fn reformat_code(code: &str, uri: &str, options: FormattingOptions) -> String {
     let c_code = CString::new(code).unwrap();
     let c_uri = CString::new(uri).unwrap();
-    let c_result = unsafe { ReformatLuaCode(c_code.as_ptr(), c_uri.as_ptr()) };
+    let c_result = unsafe { ReformatLuaCode(c_code.as_ptr(), c_uri.as_ptr(), options) };
     let result = unsafe { CStr::from_ptr(c_result).to_string_lossy().into_owned() };
     unsafe { FreeReformatResult(c_result) };
     result
@@ -61,6 +86,7 @@ pub fn range_format_code(
     start_col: i32,
     end_line: i32,
     end_col: i32,
+    options: FormattingOptions,
 ) -> Option<RangeFormatResult> {
     let c_code = CString::new(code).unwrap();
     let c_uri = CString::new(uri).unwrap();
@@ -72,6 +98,7 @@ pub fn range_format_code(
             start_col,
             end_line,
             end_col,
+            options,
         )
     };
 
